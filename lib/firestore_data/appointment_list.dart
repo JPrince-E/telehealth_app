@@ -173,7 +173,7 @@ class _AppointmentListState extends State<AppointmentList> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 5),
                                 child: Text(
-                                  userRole == 'doctor' || userRole == 'nurse'
+                                  isDoctor || isNurse
                                       ? document['patientName']
                                       : document['doctorName'],
                                   style: GoogleFonts.lato(

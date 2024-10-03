@@ -16,35 +16,26 @@ class _DoctorOrPatientState extends State<DoctorOrPatient> {
   bool _isLoading = true;
   void _setUser() async {
     final User? user = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot snap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
 
-    if (user != null) {
-      DocumentSnapshot snap = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+    var basicInfo = snap.data() as Map<String, dynamic>;
 
-      if (snap.exists && snap.data() != null) {
-        var basicInfo = snap.data() as Map<String, dynamic>;
+    isDoctor = basicInfo['role'] == 'doctor' ? true : false;
+    print('isDoctor : $isDoctor');
 
-        // isDoctor = basicInfo['role'] == 'doctor';
-        userRole = basicInfo['role'];
-        print('userRole : $userRole');
-      } else {
-        // Handle the case where the document does not exist or has no data
-        print('No user data found');
-        // You could set a default value or navigate to an error screen, etc.
-      }
-    } else {
-      // Handle the case where the user is null, possibly navigate to a login screen
-      print('User is not logged in');
-      // For example: Navigator.pushReplacementNamed(context, '/login');
-    }
+    isNurse = basicInfo['role'] == 'nurse' ? true : false;
+    print('isNurse : $isNurse');
+
+    isPatient = basicInfo['role'] == 'patient' ? true : false;
+    print('isPatient : $isPatient');
 
     setState(() {
       _isLoading = false;
     });
   }
-
 
   @override
   void initState() {
@@ -56,8 +47,8 @@ class _DoctorOrPatientState extends State<DoctorOrPatient> {
   Widget build(BuildContext context) {
     return _isLoading
         ? const Scaffold(body: Center(child: CircularProgressIndicator()))
-        : userRole == 'doctor' || userRole == 'patient'
-            ? const MainPageDoctor()
-            : const MainPagePatient();
+        : isPatient
+        ? const MainPagePatient()
+        : const MainPageDoctor();
   }
 }

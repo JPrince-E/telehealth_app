@@ -85,7 +85,7 @@ class _MainPageDoctorState extends State<MainPageDoctor> {
                   ),
                   GButton(
                     icon: Typicons.document_add,
-                    text: 'Add Disease',
+                    text: 'Add Record',
                   ),
                   GButton(
                     icon: Typicons.user,

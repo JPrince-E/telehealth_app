@@ -364,6 +364,15 @@ class _SignInState extends State<SignIn> {
         SharedPreferenceHelper().saveUserName(basicInfo['name']);
         SharedPreferenceHelper().saveAccountType(userRole);
 
+        print('userRole: $userRole');
+
+        userRole == 'doctor' ? isDoctor = true : userRole == 'nurse' ? isNurse = true : isPatient = true;
+
+
+        print('isDoctor :$isDoctor');
+        print('isNurse :$isNurse');
+        print('isPatient :$isPatient');
+
         // Navigate to the home screen
         Navigator.of(context)
             .pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);

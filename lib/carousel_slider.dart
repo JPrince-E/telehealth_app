@@ -41,12 +41,12 @@ class Carouselslider extends StatelessWidget {
                 index == 0
                     ? Navigator.push(context,
                         MaterialPageRoute(builder: (BuildContext context) {
-                        return const ViewMedicalRecords();
+                        return const Chats();
                       }))
                     :
                   Navigator.push(context,
                         MaterialPageRoute(builder: (BuildContext context) {
-                        return const Chats();
+                        return const ViewMedicalRecords();
                       }));
               },
               child: Stack(

@@ -11,18 +11,18 @@ class BannerModel {
 
 List<BannerModel> bannerCards = [
   BannerModel(
-      userRole == 'doctor' || userRole == 'nurse'
+      isDoctor || isNurse
           ?"Cyber Training"
-      :"View Medical Record",
+      :"Chats",
       [
         const Color(0xff7ae36b),
         const Color(0xff248704),
       ],
       "assets/414-bg.png"),
   BannerModel(
-      userRole == 'doctor' || userRole != 'patient'
+      isDoctor
           ?"Add Medical Record"
-          :"Chats",
+          :"View Medical Record",
       [
         const Color(0xff7ae36b),
         const Color(0xff248704),

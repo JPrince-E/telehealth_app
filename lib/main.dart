@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
             : const DoctorOrPatient(),
         '/login': (context) => const FireBaseAuth(),
         '/home': (context) =>
-        userRole == 'doctor' || userRole == 'nurse' ? const MainPageDoctor() : const MainPagePatient(),
+        userRole == 'patient' ? const MainPagePatient() : const MainPageDoctor(),
         '/profile': (context) => const MyProfile(),
         '/MyAppointments': (context) => const Appointments(),
         '/AddRecord': (context) => const AddMedicalRecord(),

@@ -25,7 +25,7 @@ class _UserDetailsState extends State<UserDetails> {
     user = _auth.currentUser!;
 
     DocumentSnapshot snap = await FirebaseFirestore.instance
-        .collection(userRole)
+        .collection(isDoctor ? 'doctor': isNurse ? 'nurse' : 'patient')
         .doc(user.uid)
         .get();
 

@@ -26,13 +26,13 @@ class _MyProfileState extends State<MyProfile> {
 
   ScrollController _scrollController = ScrollController();
 
-
   // details
   String? email;
   String? name;
   String? phone;
   String? bio;
   String? specialization;
+
   // default dp
   String image =
       'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png';
@@ -41,7 +41,7 @@ class _MyProfileState extends State<MyProfile> {
     user = _auth.currentUser!;
 
     DocumentSnapshot snap = await FirebaseFirestore.instance
-        .collection(userRole)
+        .collection(isDoctor ? 'doctor': isNurse ? 'nurse' : 'patient')
         .doc(user.uid)
         .get();
 
@@ -69,7 +69,6 @@ class _MyProfileState extends State<MyProfile> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +80,6 @@ class _MyProfileState extends State<MyProfile> {
               overscroll.disallowIndicator();
               return true;
             },
-        
             child: ListView(
               controller: _scrollController,
               physics: const ClampingScrollPhysics(),
@@ -103,7 +101,9 @@ class _MyProfileState extends State<MyProfile> {
                                 Colors.tealAccent,
                               ],
                             ),
-                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(70), bottomRight: Radius.circular(70)),
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(70),
+                                bottomRight: Radius.circular(70)),
                           ),
                           height: MediaQuery.of(context).size.height / 5,
                           child: Container(
@@ -144,11 +144,11 @@ class _MyProfileState extends State<MyProfile> {
                             ),
                           ),
                         ),
-        
+
                         Text(specialization == null ? '' : '($specialization)'),
                       ],
                     ),
-        
+
                     // user image
                     Container(
                       decoration: BoxDecoration(
@@ -170,11 +170,11 @@ class _MyProfileState extends State<MyProfile> {
                     ),
                   ],
                 ),
-        
+
                 const SizedBox(
                   height: 20,
                 ),
-        
+
                 // user basic info
                 Container(
                   margin: const EdgeInsets.only(left: 15, right: 15),
@@ -254,7 +254,7 @@ class _MyProfileState extends State<MyProfile> {
                     ],
                   ),
                 ),
-        
+
                 // user bio
                 Container(
                   margin: const EdgeInsets.only(left: 15, right: 15, top: 20),
@@ -317,9 +317,7 @@ class _MyProfileState extends State<MyProfile> {
                   padding: const EdgeInsets.only(left: 23, bottom: 10),
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    userRole == 'doctor' || userRole == 'nurse'
-                        ? "User Training"
-                    : "",
+                    isDoctor || isNurse ? "User Training" : "",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.lato(
                         color: Colors.teal[800],
@@ -329,9 +327,11 @@ class _MyProfileState extends State<MyProfile> {
                 ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  child: const CarouselsliderDoctor(),
+                  child: isDoctor || isNurse
+                      ? const CarouselsliderDoctor()
+                      : const Carouselslider(),
                 ),
-        
+
                 // Appointment history
                 Container(
                   margin: const EdgeInsets.only(left: 15, right: 15, top: 20),
@@ -378,6 +378,7 @@ class _MyProfileState extends State<MyProfile> {
                                 height: 30,
                                 child: TextButton(
                                   onPressed: () {
+                                    print('isDoctor: $isDoctor');
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -476,10 +477,7 @@ class _MyProfileState extends State<MyProfile> {
       setState(() {
         image = Uri.decodeFull(downloadUrl.toString());
       });
-      FirebaseFirestore.instance
-          .collection(userRole)
-          .doc(user.uid)
-          .set({
+      FirebaseFirestore.instance.collection(isDoctor ? 'doctor': isNurse ? 'nurse' : 'patient').doc(user.uid).set({
         'profilePhoto': downloadUrl,
       }, SetOptions(merge: true));
 

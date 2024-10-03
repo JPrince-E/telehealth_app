@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:telehealth_app/globals.dart';
 
 class ViewMedicalRecords extends StatefulWidget {
   const ViewMedicalRecords({Key? key}) : super(key: key);
@@ -13,44 +14,75 @@ class ViewMedicalRecords extends StatefulWidget {
 class _ViewMedicalRecordsState extends State<ViewMedicalRecords> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User user;
-  late Future<List<Map<String, dynamic>>> _recordsFuture;
+  Future<List<Map<String, dynamic>>>? _recordsFuture;
 
-  Future<void> _getUser() async {
-    user = _auth.currentUser!;
-  }
+  bool isLoading = true; // Add a loading flag
 
   Future<void> _initialize() async {
     user = _auth.currentUser!;
-    _recordsFuture = _fetchRecords();
+
+    // Fetch user role (assume this is fetched from Firestore or user metadata)
+    final userRoleSnapshot = await FirebaseFirestore.instance
+        .collection('medical_records')
+        .doc(user.uid)
+        .get();
+
+    if (userRoleSnapshot.exists) {
+      isNurse = userRoleSnapshot.data()?['isNurse'] ?? false;
+    }
+
+    setState(() {
+      _recordsFuture = _fetchRecords();
+      isLoading = false; // Once data is initialized, stop loading
+    });
   }
 
   Future<List<Map<String, dynamic>>> _fetchRecords() async {
     try {
-      // Fetch medical records for the current patient
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('medical_records')
-          .doc(user.uid)
-          .get();
+      if (isNurse) {
+        // Fetch all medical records if the user is a nurse
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('medical_records')
+            .get();
 
-      if (!docSnapshot.exists) {
-        throw Exception('No records found for this user.');
-      }
+        return querySnapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'name': data['Name'], // Add a name field to identify records
+            'age': data['Age'],
+            'bloodGroup': data['BloodGroup'],
+            'genotype': data['Genotype'],
+            'weight': data['Weight'],
+            'ailment': data['Ailment'],
+            'prescription': data['Prescription'],
+            'createdAt': data['CreatedAt'],
+          };
+        }).toList();
+      } else {
+        // Fetch medical records for the current patient
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('medical_records')
+            .doc(user.uid)
+            .get();
 
-      // Extract data from the document
-      final data = docSnapshot.data()!;
-
-      // Return data as a list
-      return [
-        {
-          'age': data['Age'],
-          'bloodGroup': data['BloodGroup'],
-          'genotype': data['Genotype'],
-          'weight': data['Weight'],
-          'ailment': data['Ailment'],
-          'prescription': data['Prescription'],
-          'createdAt': data['CreatedAt'],
+        if (!docSnapshot.exists) {
+          throw Exception('No records found for this user.');
         }
-      ];
+
+        final data = docSnapshot.data()!;
+        return [
+          {
+            'name': data['Name'],
+            'age': data['Age'],
+            'bloodGroup': data['BloodGroup'],
+            'genotype': data['Genotype'],
+            'weight': data['Weight'],
+            'ailment': data['Ailment'],
+            'prescription': data['Prescription'],
+            'createdAt': data['CreatedAt'],
+          }
+        ];
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching records: $e')),
@@ -69,10 +101,12 @@ class _ViewMedicalRecordsState extends State<ViewMedicalRecords> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Medical Records', style: GoogleFonts.lato()),
+        title: Text(isNurse ? 'All Medical Records' : 'My Medical Records', style: GoogleFonts.lato()),
         backgroundColor: Colors.teal,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator()) // Show loading spinner
+          : FutureBuilder<List<Map<String, dynamic>>>(
         future: _recordsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -97,7 +131,7 @@ class _ViewMedicalRecordsState extends State<ViewMedicalRecords> {
               return ListTile(
                 contentPadding: const EdgeInsets.all(16.0),
                 title: Text(
-                  'Medical Record',
+                  isNurse ? 'Patient: ${record['name'] ?? 'Unknown'}' : 'Medical Record',
                   style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(

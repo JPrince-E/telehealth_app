@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:telehealth_app/globals.dart';
 import 'package:telehealth_app/model/banner_model.dart';
 import 'package:telehealth_app/screens/doctor/add_medical_record.dart';
-import 'package:webview_flutter/webview_flutter.dart'; // Import WebView
+import 'package:telehealth_app/screens/view_medical_record.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'loading_widget.dart';
 
 class CarouselsliderDoctor extends StatefulWidget {
@@ -16,30 +18,29 @@ class CarouselsliderDoctor extends StatefulWidget {
 
 class _CarouselsliderDoctorState extends State<CarouselsliderDoctor> {
   bool isLoading = true;
-  final _key = UniqueKey();
   late WebViewController controller;
 
   @override
   void initState() {
     super.initState();
 
-    if (Platform.isAndroid) {
+    // if (Platform.isAndroid) {
+    //   WebView.platform = SurfaceAndroidWebView(); // Ensure WebView is set for Android
+    // }
 
-      controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onProgress: (int progress) {},
-            onPageStarted: (String url) {},
-            onPageFinished: (String url) {
-              setState(() {
-                isLoading = false;
-              });
-            },
-          ),
-        )
-        ..loadRequest(Uri.parse('https://telehealth-app-web.vercel.app/'));
-    }
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
+            setState(() {
+              isLoading = false;
+            });
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://telehealth-training-web-app.netlify.app'));
   }
 
   @override
@@ -65,23 +66,34 @@ class _CarouselsliderDoctorState extends State<CarouselsliderDoctor> {
             ),
             child: GestureDetector(
               onTap: () {
+                print('isDoctor: $isDoctor');
                 if (index == 0) {
                   Navigator.push(context, MaterialPageRoute(
                     builder: (BuildContext context) {
                       return Scaffold(
                         appBar: AppBar(
                           title: const Text('Telehealth Web View'),
+                          leading: IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () async {
+                              // Check if WebView can go back
+                              if (await controller.canGoBack()) {
+                                controller.goBack();
+                              } else {
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
                         ),
                         body: Stack(
                           children: [
                             WillPopScope(
                               onWillPop: () async {
-                                String? url = await controller.currentUrl();
-                                if (url == 'https://telehealth-app-web.vercel.app/') {
-                                  return true;
-                                } else {
+                                if (await controller.canGoBack()) {
                                   controller.goBack();
-                                  return false;
+                                  return false; // Prevent app from closing
+                                } else {
+                                  return true; // Exit the WebView
                                 }
                               },
                               child: WebViewWidget(controller: controller),
@@ -95,7 +107,7 @@ class _CarouselsliderDoctorState extends State<CarouselsliderDoctor> {
                 } else {
                   Navigator.push(context, MaterialPageRoute(
                     builder: (BuildContext context) {
-                      return const AddMedicalRecord();
+                      return isDoctor ? const AddMedicalRecord() : const ViewMedicalRecords();
                     },
                   ));
                 }

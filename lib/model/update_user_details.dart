@@ -123,7 +123,7 @@ class _UpdateUserDetailsState extends State<UpdateUserDetails> {
 
   Future<void> updateData() async {
     FirebaseFirestore.instance
-        .collection(userRole)
+        .collection(isDoctor ? 'doctor': isNurse ? 'nurse' : 'patient')
         .doc(userID)
         .set({
       widget.field: _textcontroller.text,

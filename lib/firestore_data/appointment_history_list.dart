@@ -1,3 +1,4 @@
+import 'package:telehealth_app/globals.dart' as globals;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -93,6 +94,7 @@ class _AppointmentHistoryListState extends State<AppointmentHistoryList> {
                                 // doctor name
                                 Text(
                                   '${index + 1}. ${userRole == 'doctor' || userRole == 'nurse' ? '${document['patientName']}' : '${document['doctorName']}'}',
+                                  // '${index + 1}. ${globals.isDoctor ? '${document['patientName']}' : '${globals.isDoctor ? '${document['doctorName']}' : '${globals.isDoctor ? '${document['patientName']}'}',
                                   style: GoogleFonts.lato(
                                     fontSize: 15,
                                   ),

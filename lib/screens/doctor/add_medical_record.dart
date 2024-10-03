@@ -46,7 +46,7 @@ class _AddMedicalRecordState extends State<AddMedicalRecord> {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('appointments')
           .doc(doctorId)
-          .collection('pending')
+          .collection('all')
           .get();
 
       print('Fetched ${querySnapshot.docs.length} appointment(s).');
@@ -86,10 +86,14 @@ class _AddMedicalRecordState extends State<AddMedicalRecord> {
 
   Future<void> _saveMedicalRecord() async {
     if (_formKey.currentState!.validate() && selectedPatientId != null) {
+
+      String patientName = patientNames[selectedPatientId!] ?? 'Unknown';
+
       await FirebaseFirestore.instance
           .collection('medical_records')
           .doc(selectedPatientId)
           .set({
+        'Name': patientName,
         'Age': _ageController.text,
         'BloodGroup': _bloodGroupController.text,
         'Genotype': _genotypeController.text,
